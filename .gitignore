@@ -1,0 +1,15 @@
+﻿__pycache__/
+*.pyc
+dist/
+build/
+*.spec
+_test_*
+*.exe
+*.ico
+*.png
+logger.py
+log_change.py
+run.bat
+run_web.bat
+main.py
+web.py
