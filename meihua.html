@@ -1,0 +1,515 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0a16">
+<title>梅花易数</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#0a0a16;--card:#111125;--card2:#0e0e1e;--gold:#ffd700;--gold2:#b8960f;--dim:#555577;--dim2:#333355;--yang:#44aaff;--yin:#6688ff;--dong:#ffdd00;--green:#44ff44;--red:#ff4444;--text:#ccccdd;--text2:#9999bb;--sidebar-w:min(320px,85vw)}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:520px;margin:0 auto;overflow-x:hidden;position:relative;padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.top-bar{position:relative;padding:28px 16px 12px;background:linear-gradient(180deg,#151530,var(--bg))}
+.back-btn{position:absolute;left:12px;top:28px;background:none;border:none;color:var(--gold);font-size:14px;cursor:pointer;padding:4px 8px;opacity:.8}
+.back-btn:active{background:#1a1a30}
+.settings-btn{position:absolute;right:12px;top:28px;background:none;border:none;color:var(--dim);font-size:20px;cursor:pointer;padding:4px 8px}
+.settings-btn:active{background:#1a1a30}
+.hist-btn{position:absolute;right:48px;top:28px;background:none;border:none;color:var(--dim);font-size:18px;cursor:pointer;padding:4px 8px}
+.hist-btn:active{background:#1a1a30}
+.header{text-align:center;padding:0}
+.header h1{font-size:22px;color:var(--gold);text-shadow:0 0 20px rgba(255,215,0,.3);letter-spacing:4px}
+.header p{font-size:9px;color:var(--dim);margin-top:2px;letter-spacing:1px;white-space:nowrap}
+.card{background:var(--card);border-radius:12px;padding:14px;margin:8px 12px;border:1px solid #1a1a35}
+.tabs{display:flex;gap:4px;margin:8px 12px;background:var(--card2);border-radius:10px;overflow:hidden;padding:4px}
+.tab{flex:1;padding:8px 4px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;color:var(--dim);border:none;background:none;transition:all .2s;white-space:nowrap}
+.tab.active{background:linear-gradient(135deg,#2a2a55,#1e1e40);color:var(--gold)}
+.tab:hover{color:var(--text)}
+.tab:active{opacity:.8}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.input-group{margin:6px 0}
+.input-group label{display:block;font-size:12px;color:var(--text2);margin-bottom:4px}
+.input-group input{width:100%;background:#15152a;border:1px solid #2a2a44;border-radius:8px;padding:10px 12px;color:#fff;font-size:14px;outline:none}
+.input-group input:focus{border-color:var(--gold)}
+.input-group input::placeholder{color:#444466;font-size:13px}
+.input-row-flex{display:flex;gap:8px}
+.input-row-flex .input-group{flex:1}
+.dir-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:4px 0}
+.dir-btn{padding:12px 4px;border:1px solid #2a2a44;border-radius:10px;background:var(--card2);color:var(--text);font-size:14px;cursor:pointer;text-align:center;transition:all .15s}
+.dir-btn:hover{border-color:var(--gold2);transform:translateY(-1px)}
+.dir-btn:active{transform:scale(.96)}
+.dir-btn.selected{border-color:var(--gold);color:var(--gold);background:#1a1a35}
+.btn-divine{display:block;width:calc(100% - 24px);margin:10px 12px;padding:13px;border:none;border-radius:10px;background:linear-gradient(135deg,#cc3333,#aa2222);color:#fff;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:2px;transition:all .15s}
+.btn-divine:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(204,51,51,.3)}
+.btn-divine:active{transform:scale(.97)}
+.btn-divine:disabled{background:#444455;color:#666;cursor:default}
+.time-info{font-size:11px;color:var(--dim);text-align:center;margin:4px 12px}
+#resultsArea{display:none}
+#resultsArea.show{display:block}
+.result-section{background:var(--card);border-radius:12px;padding:14px;margin:8px 12px;border:1px solid #1a1a35}
+.result-section-title{font-size:14px;font-weight:700;color:var(--gold);margin-bottom:8px;text-align:center;letter-spacing:2px}
+.gua-display{display:flex;align-items:center;justify-content:center;gap:10px;margin:6px 0}
+.trigram-box{text-align:center}
+.trigram-lines{font-family:monospace;font-size:18px;line-height:1.2;color:var(--yang)}
+.trigram-name{font-size:11px;color:var(--text2);margin-top:2px}
+.gua-arrow{font-size:18px;color:var(--gold)}
+.gua-title{font-size:18px;font-weight:700;color:var(--gold);text-align:center;margin:6px 0}
+.gua-fortune{font-size:14px;font-weight:600;text-align:center;margin:2px 0}
+.detail-row{display:flex;padding:5px 0;border-bottom:1px solid #1a1a2a;font-size:12px}
+.detail-label{width:65px;color:var(--dim);flex-shrink:0}
+.detail-value{flex:1;color:var(--text)}
+.tiyong-rel{font-size:15px;font-weight:700;text-align:center;padding:8px;border-radius:8px;margin:6px 0}
+.tiyong-rel.ji{color:var(--green);background:rgba(68,255,68,.08)}
+.tiyong-rel.xiong{color:var(--red);background:rgba(255,68,68,.08)}
+.tiyong-rel.ping{color:var(--dong);background:rgba(255,221,0,.08)}
+.liangxiang-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.liangxiang-card{background:var(--card2);border-radius:8px;padding:10px}
+.lx-title{font-size:12px;font-weight:700;color:var(--gold);margin-bottom:4px}
+.lx-cat{font-size:11px;color:var(--dim);margin-bottom:2px}
+.lx-items{font-size:11px;color:var(--text);line-height:1.6}
+.score-card{text-align:center;padding:12px}
+.score-num{font-size:36px;font-weight:900}
+.score-label{font-size:12px;color:var(--text2);margin-top:2px}
+.score-bar{width:80%;height:6px;border-radius:3px;background:#222;margin:8px auto;overflow:hidden}
+.score-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.btn-row{display:flex;gap:10px;padding:0 12px;margin:10px 0 20px;}.btn-ai{flex:1;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#2255aa,#1a4488);color:#fff;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:1px}
+.btn-ai:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(34,85,170,.3)}
+.btn-ai:active{transform:scale(.97)}
+.copy-hint{font-size:11px;color:var(--green);text-align:center;min-height:16px;margin-bottom:10px}
+.sidebar-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:100;opacity:0;pointer-events:none;transition:opacity .4s}
+.sidebar-overlay.show{opacity:1;pointer-events:auto}
+.sidebar{position:fixed;top:0;right:0;width:var(--sidebar-w);height:100%;background:linear-gradient(180deg,rgba(17,17,40,.98),rgba(10,10,22,.99));z-index:101;transform:translateX(100%);transition:transform .4s cubic-bezier(.22,1,.36,1);overflow-y:auto;padding:20px 16px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-left:1px solid rgba(255,215,0,.1);box-shadow:-4px 0 30px rgba(0,0,0,.5)}
+.sidebar.show{transform:translateX(0)}
+.sidebar-title{font-size:16px;font-weight:700;color:var(--gold);margin-bottom:16px;padding-bottom:12px;display:flex;justify-content:space-between;align-items:center;position:relative}
+.sidebar-close{background:none;border:none;color:var(--dim);font-size:20px;cursor:pointer;padding:4px 8px}
+.sidebar-section{margin-bottom:16px}
+.sidebar-section h3{font-size:12px;color:var(--dim);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.sidebar-section input{width:100%;background:#15152a;border:1px solid #2a2a44;border-radius:8px;padding:9px 10px;color:#fff;font-size:13px;outline:none;margin-bottom:6px}
+.sidebar-section input:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(255,215,0,.12),0 0 20px rgba(255,215,0,.06)}
+.sidebar-section label{display:block;font-size:11px;color:var(--text2);margin-bottom:3px}
+.sidebar-btn{width:100%;padding:10px;border:1px solid #2a2a44;border-radius:8px;background:var(--card2);color:var(--text);font-size:13px;cursor:pointer;margin-bottom:6px}
+.sidebar-btn:active{background:#2a2a50}
+.sidebar-btn.primary{background:linear-gradient(135deg,#2255aa,#1a4488);border-color:#3366cc;color:#fff}
+.sidebar-status{font-size:11px;color:var(--dim);text-align:center;margin-top:8px;min-height:16px}
+.footer{text-align:center;padding:14px;font-size:10px;color:#333355}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .35s ease}
+
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.ai-cursor{display:inline-block;width:2px;height:1em;background:var(--gold);animation:aiBlink 1s infinite;vertical-align:text-bottom}
+@keyframes aiBlink{0%,50%{opacity:1}51%,100%{opacity:0}}
+.card,.tabs{opacity:0;transform:translateY(10px);animation:fadeUp .4s ease forwards}
+.card:nth-child(1){animation-delay:.05s}
+.card:nth-child(2){animation-delay:.1s}
+.tabs{animation-delay:.05s}
+body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at 30% 40%,rgba(255,215,0,.03) 0%,transparent 50%),radial-gradient(circle at 70% 60%,rgba(68,170,255,.03) 0%,transparent 50%);pointer-events:none;z-index:0}
+.result-section{opacity:0;transform:translateY(12px);animation:fadeUp .45s ease forwards}
+.result-section:nth-child(1){animation-delay:.1s}
+.result-section:nth-child(2){animation-delay:.2s}
+.result-section:nth-child(3){animation-delay:.3s}
+.result-section:nth-child(4){animation-delay:.4s}
+.result-section:nth-child(5){animation-delay:.5s}
+.result-section:nth-child(6){animation-delay:.6s}
+.sidebar::before{content:"";position:absolute;top:0;left:0;width:1px;height:100%;background:linear-gradient(180deg,transparent,rgba(255,215,0,.4),rgba(68,170,255,.2),transparent);animation:sidebarGlow 3s ease-in-out infinite}
+@keyframes sidebarGlow{0%,100%{opacity:.4}50%{opacity:1}}
+.sidebar::-webkit-scrollbar{width:3px}
+.sidebar::-webkit-scrollbar-track{background:transparent}
+.sidebar::-webkit-scrollbar-thumb{background:rgba(255,215,0,.2);border-radius:3px}
+.sidebar::-webkit-scrollbar-thumb:hover{background:rgba(255,215,0,.4)}
+
+
+/* ===== 炫酷特效 ===== */
+/* 星空背景 */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background:
+    radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.6), transparent),
+    radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,.4), transparent),
+    radial-gradient(1px 1px at 50% 10%, rgba(255,215,0,.5), transparent),
+    radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,.3), transparent),
+    radial-gradient(1px 1px at 90% 40%, rgba(255,215,0,.4), transparent),
+    radial-gradient(1px 1px at 15% 85%, rgba(68,170,255,.4), transparent),
+    radial-gradient(1px 1px at 45% 45%, rgba(255,255,255,.5), transparent),
+    radial-gradient(1px 1px at 65% 25%, rgba(255,215,0,.3), transparent),
+    radial-gradient(1px 1px at 85% 65%, rgba(68,170,255,.3), transparent),
+    radial-gradient(1px 1px at 25% 35%, rgba(255,255,255,.4), transparent),
+    radial-gradient(1.5px 1.5px at 55% 75%, rgba(255,215,0,.5), transparent),
+    radial-gradient(1px 1px at 5% 50%, rgba(255,255,255,.3), transparent),
+    radial-gradient(1px 1px at 75% 15%, rgba(68,170,255,.4), transparent),
+    radial-gradient(1px 1px at 35% 90%, rgba(255,215,0,.3), transparent),
+    radial-gradient(1.5px 1.5px at 95% 5%, rgba(255,255,255,.5), transparent);
+  pointer-events: none;
+  z-index: 0;
+  animation: starTwinkle 4s ease-in-out infinite alternate;
+}
+@keyframes starTwinkle {
+  0% { opacity: .5; }
+  50% { opacity: .9; }
+  100% { opacity: .6; }
+}
+
+/* 流星效果 */
+@keyframes shootingStar {
+  0% { transform: translate(0, 0) rotate(-45deg); opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: translate(300px, 300px) rotate(-45deg); opacity: 0; }
+}
+
+/* 标题呼吸发光 */
+.header h1 {
+  animation: titleGlow 3s ease-in-out infinite;
+}
+@keyframes titleGlow {
+  0%, 100% { text-shadow: 0 0 20px rgba(255,215,0,.2), 0 0 40px rgba(255,215,0,.05); }
+  50% { text-shadow: 0 0 30px rgba(255,215,0,.4), 0 0 60px rgba(255,215,0,.1), 0 0 80px rgba(255,215,0,.05); }
+}
+/* 卡片悬浮光效 */
+.card {
+  position: relative;
+  overflow: hidden;
+  transition: transform .3s, box-shadow .3s, border-color .3s;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0,0,0,.3), 0 0 30px rgba(255,215,0,.05);
+  border-color: rgba(255,215,0,.15);
+}
+.card::after {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: linear-gradient(45deg, transparent 40%, rgba(255,215,0,.02) 50%, transparent 60%);
+  transform: translateX(-100%);
+  transition: transform .8s;
+  pointer-events: none;
+}
+.card:hover::after {
+  transform: translateX(100%);
+}
+/* 按钮脉冲 */
+.btn-cast {
+  position: relative;
+  overflow: hidden;
+}
+.btn-cast::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 0; height: 0;
+  background: rgba(255,255,255,.15);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width .5s, height .5s;
+}
+.btn-cast:active::before {
+  width: 300px; height: 300px;
+}
+
+#particleCanvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <button class="back-btn" onclick="location.href='index.html'">←</button>
+  <div class="header">
+    <h1>☯ 梅花易数 ☯</h1>
+    <p>体用生克 · 卦象类象 · 趋吉避凶</p>
+  </div>
+  <button class="hist-btn" onclick="openHistory()" title="历史记录">🕘</button>
+  <button class="settings-btn" onclick="toggleSidebar()">⚙</button>
+</div>
+<div class="tabs">
+  <button class="tab active" onclick="switchTab(0)">数字起卦</button>
+  <button class="tab" onclick="switchTab(1)">时间起卦</button>
+  <button class="tab" onclick="switchTab(2)">方位起卦</button>
+</div>
+<div class="card tab-panel active" id="panel0">
+  <div class="input-row-flex">
+    <div class="input-group"><label>上卦数</label><input type="number" id="numUpper" min="1" placeholder="如：3"></div>
+    <div class="input-group"><label>下卦数</label><input type="number" id="numLower" min="1" placeholder="如：5"></div>
+  </div>
+  <div class="input-group"><label>变父数（可选，默认自动计算）</label><input type="number" id="numMove" min="0" max="6" placeholder="留空则自动"></div>
+</div>
+<div class="card tab-panel" id="panel1">
+  <div class="time-info" id="timeInfo"></div>
+  <div class="input-row-flex">
+    <div class="input-group"><label>年</label><input type="number" id="tYear" min="1900" max="2100"></div>
+    <div class="input-group"><label>月</label><input type="number" id="tMonth" min="1" max="12"></div>
+    <div class="input-group"><label>日</label><input type="number" id="tDay" min="1" max="31"></div>
+  </div>
+  <div class="input-group"><label>时辰（0-23）</label><input type="number" id="tHour" min="0" max="23"></div>
+</div>
+<div class="card tab-panel" id="panel2">
+  <p style="font-size:12px;color:var(--text2);text-align:center;margin-bottom:8px">选择来人方位（后天八卦方位）</p>
+  <div class="dir-grid">
+    <button class="dir-btn" onclick="pickDir(this,4)" data-dir="4">巽<br><span style="font-size:10px;color:var(--dim)">东南</span></button>
+    <button class="dir-btn" onclick="pickDir(this,3)" data-dir="3">离<br><span style="font-size:10px;color:var(--dim)">南</span></button>
+    <button class="dir-btn" onclick="pickDir(this,2)" data-dir="2">坤<br><span style="font-size:10px;color:var(--dim)">西南</span></button>
+    <button class="dir-btn" onclick="pickDir(this,0)" data-dir="0">兑<br><span style="font-size:10px;color:var(--dim)">西</span></button>
+    <button class="dir-btn" onclick="pickDir(this,-1)" data-dir="-1" style="border-color:var(--gold);color:var(--gold);background:rgba(255,215,0,.05)">☯<br><span style="font-size:10px">中宫</span></button>
+    <button class="dir-btn" onclick="pickDir(this,1)" data-dir="1">震<br><span style="font-size:10px;color:var(--dim)">东</span></button>
+    <button class="dir-btn" onclick="pickDir(this,6)" data-dir="6">乾<br><span style="font-size:10px;color:var(--dim)">西北</span></button>
+    <button class="dir-btn" onclick="pickDir(this,5)" data-dir="5">坎<br><span style="font-size:10px;color:var(--dim)">北</span></button>
+    <button class="dir-btn" onclick="pickDir(this,7)" data-dir="7">艮<br><span style="font-size:10px;color:var(--dim)">东北</span></button>
+  </div>
+</div>
+<button class="btn-divine" id="btnDivine" onclick="divine()">☯ 起 卦</button>
+<div id="resultsArea"></div>
+<div class="footer">梅花易数 · 传统术数智慧</div>
+<!-- History panel -->
+<div class="sidebar-overlay" id="historyOverlay" onclick="closeHistory()"></div>
+<div class="sidebar" id="historyPanel">
+  <div class="sidebar-title">🕘 历史记录 <button class="sidebar-close" onclick="closeHistory()">&times;</button></div>
+  <div id="historyList" style="flex:1;overflow-y:auto"></div>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-title">设置 <button class="sidebar-close" onclick="toggleSidebar()">×</button></div>
+  <div class="sidebar-section">
+    <h3>AI 服务配置</h3>
+    <label>API 地址</label>
+    <input type="text" id="cfgApi" placeholder="https://api.openai.com/v1">
+    <label>API Key</label>
+    <input type="password" id="cfgKey" placeholder="sk-...">
+    <label>模型</label>
+    <input type="text" id="cfgModel" placeholder="gpt-4o">
+    <button class="sidebar-btn" onclick="testConnection()">测试连接</button>
+    <div class="sidebar-status" id="connStatus"></div>
+  </div>
+  <div class="sidebar-section">
+    <button class="sidebar-btn primary" onclick="saveConfig()">保存配置</button>
+    <button class="sidebar-btn" onclick="loadConfig()">恢复默认</button>
+  </div>
+</div><script>
+
+var MEIHUA_DATA = {"卦象类象":{"乾":{"天时":["天","冰","雹"],"地理":["西北方","京都","大郡"],"人物":["君","父","老人","宦官"],"身体":["头","骨","肺"],"动物":["马","象","狮"],"静物":["金玉","宝珠","圆物"],"屋宅":["公厕","楼台","高堂"],"家宅":["秋占宅兴隆","夏占有祸"],"婚姻":["官贵之眷","有名望之家"],"饮食":["马肉","珍味"],"求名":["有名","宜随内任"],"谋望":["有成","利公门"],"交易":["宜金","玉之交易"],"求利":["有财","金玉之利"],"出行":["利于出行","宜入京师"],"疾病":["头面之疾","肺疾"],"坟墓":["宜向西北","干山气脉"]},"兑":{"天时":["雨泽","新月","星"],"地理":["泽","水际","废井"],"人物":["少女","妾","歌伎"],"身体":["舌","口","肺"],"动物":["羊","鹿","猿"],"静物":["金刃","乐器","废物"],"屋宅":["西向居","近泽"],"家宅":["不安","防口舌"],"婚姻":["少女婚","悦成"],"饮食":["羊肉","泽中之物"],"求名":["宜西方","刑官"],"谋望":["有成","利涉泽"],"交易":["宜口舌","悦成"],"求利":["有损","防口舌之祸"],"出行":["可行","防口舌"],"疾病":["口舌之疾","肺疾"],"坟墓":["宜向西","泽山气脉"]},"离":{"天时":["日","电","虹","霞"],"地理":["南方","干亢之地","窑灶"],"人物":["中女","文人","大腹人"],"身体":["目","心","上焦"],"动物":["雉","龟","蟹"],"静物":["火","书","甲胄"],"屋宅":["阳宅","明窗"],"家宅":["安稳","防火灾"],"婚姻":["中女婚","文明之眷"],"饮食":["雉肉","煎炒"],"求名":["宜南方","文官"],"谋望":["有成","宜文书"],"交易":["宜文书","光明之交"],"求利":["有财","文书之利"],"出行":["可行","宜向南"],"疾病":["目疾","心疾","上焦之疾"],"坟墓":["宜向南","离山气脉"]},"震":{"天时":["雷","虹","地震"],"地理":["东方","树木","闹市"],"人物":["长男","勇将","狂人"],"身体":["足","肝","头发"],"动物":["龙","蛇","鹰"],"静物":["木竹","乐器","核果"],"屋宅":["东向居","近林木"],"家宅":["虚惊","防惊恐"],"婚姻":["长男婚","有声名"],"饮食":["蹄肉","山林之味"],"求名":["宜东方","武官"],"谋望":["可成","利声名"],"交易":["宜山林","木竹交易"],"求利":["有财","山林之利"],"出行":["可行","宜向东方"],"疾病":["足疾","肝疾","惊恐之症"],"坟墓":["宜向东","震山气脉"]},"巽":{"天时":["风","云","雾"],"地理":["东南方","花果菜园","草木茂盛"],"人物":["长女","秀士","寡妇"],"身体":["股","肱","气郁"],"动物":["鸡","蛇","百虫"],"静物":["木香","绳","工巧之器"],"屋宅":["东南向","近林园"],"家宅":["安稳","利市"],"婚姻":["长女婚","柔顺之眷"],"饮食":["鸡肉","山林之味"],"求名":["宜东南","文教"],"谋望":["可成","宜柔顺"],"交易":["宜林木","茶果交易"],"求利":["有财","山林茶果之利"],"出行":["可行","宜向东南"],"疾病":["股肱之疾","风疾","气郁"],"坟墓":["宜向东南","巽山气脉"]},"坎":{"天时":["雨","月","雪","霜"],"地理":["北方","江湖","泉井"],"人物":["中男","江湖之人","盗贼"],"身体":["耳","血","肾"],"动物":["猪","鱼","水中之物"],"静物":["水","酒","水中之物"],"屋宅":["北向居","近水"],"家宅":["不安","防阴险"],"婚姻":["中男婚","水边之缘"],"饮食":["猪肉","酒","水中之物"],"求名":["宜北方","水利"],"谋望":["不利","防险"],"交易":["宜鱼盐","酒之交易"],"求利":["有财","水边之利"],"出行":["不利","防险"],"疾病":["耳疾","血病","肾疾"],"坟墓":["宜向北","坎山气脉"]},"艮":{"天时":["云","雾","山岚"],"地理":["东北方","山径","丘陵"],"人物":["少男","山中人","闲人"],"身体":["手指","骨","鼻"],"动物":["虎","狗","鼠"],"静物":["土石","瓜果","土中之物"],"屋宅":["东北向","近山"],"家宅":["安稳","利小口"],"婚姻":["少男婚","山中之缘"],"饮食":["土中之物","瓜果"],"求名":["宜东北","阻滞"],"谋望":["阻滞","宜守成"],"交易":["宜田土","山石交易"],"求利":["有利","山中之利"],"出行":["阻滞","宜近处"],"疾病":["手指之疾","脾胃之疾"],"坟墓":["宜向东北","艮山气脉"]},"坤":{"天时":["阴云","雾气","冰霜"],"地理":["田野","乡里","平地"],"人物":["老母","后母","乡人"],"身体":["腹","脾","肉","胃"],"动物":["牛","百兽","母马"],"静物":["方物","柔物","布帛"],"屋宅":["村居","田舍"],"家宅":["安稳","春占不宁"],"婚姻":["利于婚姻","宜税产之家"],"饮食":["牛肉","土中之物"],"求名":["宜西南方"],"谋望":["利于求谋","乡人求谋"],"交易":["宜田土交易"],"求利":["有利","宜田土之利"],"出行":["可行","宜往西南"],"疾病":["腹疾","脾胃之疾"],"坟墓":["宜向西南","坤山气脉"]}},"体用关系":{"用生体":{"断语":"外来助我，吉。有贵人相助或意外收获。","出处":"《梅花易数》"},"体生用":{"断语":"我去生他，泄气。有所付出，耗损精力。","出处":"《梅花易数》"},"用克体":{"断语":"外来克我，凶。受他人制约或遭遇困难。","出处":"《梅花易数》"},"体克用":{"断语":"我去克他，小吉。能克服困难，但需费力。","出处":"《梅花易数》"},"体用比和":{"断语":"势均力敌，平。事情平稳发展。","出处":"《梅花易数》"}},"起卦方法":{"时间起卦":"以年月日时起卦，年数+月数+日数为上卦，年数+月数+日数+时数为下卦。","数字起卦":"以任意数字起卦，数字除以8取余数为卦，除以6取余数为爻。","方位起卦":"以来人方位起卦，按后天八卦方位对应。","声音起卦":"以听到的声音数起卦。","文字起卦":"以字的笔画数起卦。","出处":"《梅花易数》卷一"}};
+
+var GUA_NAMES = ["","乾","兑","离","震","巽","坎","艮","坤"];
+var GUA_SYMBOLS = {"乾":"☰","兑":"☱","离":"☲","震":"☳","巽":"☴","坎":"☵","艮":"☶","坤":"☷"};
+var GUA_LINES = {"乾":[1,1,1],"兑":[1,1,0],"离":[1,0,1],"震":[1,0,0],"巽":[0,1,1],"坎":[0,1,0],"艮":[0,0,1],"坤":[0,0,0]};
+var GUA_NATURE = {"乾":"天","兑":"泽","离":"火","震":"雷","巽":"风","坎":"水","艮":"山","坤":"地"};
+var GUA_WUXING = {"乾":"金","兑":"金","离":"火","震":"木","巽":"木","坎":"水","艮":"土","坤":"土"};
+var WX_SHENG = {"木":"火","火":"土","土":"金","金":"水","水":"木"};
+var WX_KE = {"木":"土","火":"金","土":"水","金":"木","水":"火"};
+var GUA64 = {"乾乾":"乾为天","乾兑":"天泽履","乾离":"天火同人","乾震":"天雷无妄","乾巽":"风天小畜","乾坎":"天水讼","乾艮":"山天大畜","乾坤":"天地否","兑乾":"天泽履","兑兑":"兑为泽","兑离":"泽火革","兑震":"泽雷随","兑巽":"泽风大过","兑坎":"水泽节","兑艮":"山泽损","兑坤":"地泽临","离乾":"火天大有","离兑":"泽火革","离离":"离为火","离震":"火雷噬嗑","离巽":"风火家人","离坎":"水火既济","离艮":"火山旅","离坤":"火地晋","震乾":"天雷无妄","震兑":"泽雷随","震离":"雷火丰","震震":"震为雷","震巽":"风雷益","震坎":"水雷屯","震艮":"山雷颐","震坤":"雷地豫","巽乾":"风天小畜","巽兑":"风泽中孚","巽离":"风火家人","巽震":"风雷益","巽巽":"巽为风","巽坎":"风水涣","巽艮":"风山渐","巽坤":"风地观","坎乾":"水天需","坎兑":"水泽节","坎离":"水火既济","坎震":"水雷屯","坎巽":"风水涣","坎坎":"坎为水","坎艮":"水山蹇","坎坤":"水地比","艮乾":"山天大畜","艮兑":"山泽损","艮离":"火山旅","艮震":"山雷颐","艮巽":"风山渐","艮坎":"水山蹇","艮艮":"艮为山","艮坤":"山地剥","坤乾":"天地否","坤兑":"地泽临","坤离":"火地晋","坤震":"雷地豫","坤巽":"风地观","坤坎":"水地比","坤艮":"山地剥","坤坤":"坤为地"};
+var GUA64_F = {"乾为天":"大吉","兑为泽":"吉","离为火":"吉","震为雷":"小吉","巽为风":"小吉","坎为水":"凶","艮为山":"小吉","坤为地":"大吉","天泽履":"吉","天火同人":"吉","天雷无妄":"吉","风天小畜":"小吉","天水讼":"凶","山天大畜":"大吉","天地否":"大凶","泽火革":"吉","泽雷随":"吉","泽风大过":"凶","水泽节":"吉","山泽损":"小凶","地泽临":"大吉","火雷噬嗑":"小吉","风火家人":"吉","水火既济":"吉","火山旅":"小凶","火地晋":"吉","风雷益":"大吉","水雷屯":"小凶","山雷颐":"吉","雷地豫":"吉","风水涣":"小凶","风山渐":"吉","风地观":"小吉","水山蹇":"凶","水地比":"吉","山地剥":"凶","地天泰":"大吉","火天大有":"大吉","地山谦":"大吉","雷火丰":"吉","雷泽归妹":"凶","风泽中孚":"大吉","雷山小过":"小凶"};
+var FORTUNE_COLOR = {"大吉":"#44ff44","吉":"#66cc66","小吉":"#cccc44","平":"#aaaacc","小凶":"#cc8844","凶":"#cc4444","大凶":"#ff2222"};
+var LUNAR_NEW_YEAR = {2020:[1,25],2021:[2,12],2022:[2,1],2023:[1,22],2024:[2,10],2025:[1,29],2026:[2,17],2027:[2,6],2028:[1,26],2029:[2,13],2030:[2,3]};
+
+function solarToLunarApprox(y,m,d){
+  var ln=LUNAR_NEW_YEAR[y];if(!ln)ln=[2,1];
+  var sNY=new Date(y,ln[0]-1,ln[1]),sD=new Date(y,m-1,d);
+  var diff=Math.floor((sD-sNY)/86400000);
+  var lY,lM=1,lD;
+  if(diff<0){var pLN=LUNAR_NEW_YEAR[y-1];if(!pLN)pLN=[2,1];var pNY=new Date(y-1,pLN[0]-1,pLN[1]);diff=Math.floor((sD-pNY)/86400000);lY=y-1;}else{lY=y;}
+  if(diff<0)diff=0;lD=diff+1;
+  for(var i=0;i<12;i++){var mD=29+((i%2===0)?1:0);if(lD>mD){lD-=mD;lM++;}else break;}
+  if(lM>12)lM=12;return {year:lY,month:lM,day:lD};
+}
+
+function hourToDizhi(h){return Math.floor(((h+1)%24)/2);}
+function numToGua(n){var r=n%8;if(r===0)r=8;return GUA_NAMES[r];}
+function calcMovingLine(n1,n2){var r=(n1+n2)%6;if(r===0)r=6;return r;}
+function getLines(u,l){return [GUA_LINES[l][0],GUA_LINES[l][1],GUA_LINES[l][2],GUA_LINES[u][0],GUA_LINES[u][1],GUA_LINES[u][2]];}
+function flipLines(ls,ml){var f=ls.slice();for(var i=0;i<ml.length;i++){f[ml[i]-1]^=1;}return f;}
+function linesToUL(ls){
+  function l2g(s){for(var g in GUA_LINES){if(GUA_LINES[g][0]===s[0]&&GUA_LINES[g][1]===s[1]&&GUA_LINES[g][2]===s[2])return g;}return "坤";}
+  return {upper:l2g(ls.slice(3)),lower:l2g(ls.slice(0,3))};
+}
+function calcHugua(ls){
+  function l2g(s){for(var g in GUA_LINES){if(GUA_LINES[g][0]===s[0]&&GUA_LINES[g][1]===s[1]&&GUA_LINES[g][2]===s[2])return g;}return "坤";}
+  return {upper:l2g([ls[2],ls[3],ls[4]]),lower:l2g([ls[1],ls[2],ls[3]])};
+}
+function getWuxingRel(tiWX,yoWX){
+  if(tiWX===yoWX)return "体用比和";
+  if(WX_SHENG[yoWX]===tiWX)return "用生体";
+  if(WX_SHENG[tiWX]===yoWX)return "体生用";
+  if(WX_KE[yoWX]===tiWX)return "用克体";
+  if(WX_KE[tiWX]===yoWX)return "体克用";
+  return "体用比和";
+}
+function calcScore(r){switch(r){case "用生体":return 90;case "体克用":return 75;case "体用比和":return 60;case "体生用":return 40;case "用克体":return 20;default:return 50;}}
+
+var selectedTab=0,selectedDir=null;
+function switchTab(idx){selectedTab=idx;var t=document.querySelectorAll('.tab'),p=document.querySelectorAll('.tab-panel');for(var i=0;i<t.length;i++){t[i].classList.toggle('active',i===idx);p[i].classList.toggle('active',i===idx);}if(idx===1)fillTime();}
+function pickDir(btn,idx){selectedDir=idx;var b=document.querySelectorAll('.dir-btn');for(var i=0;i<b.length;i++)b[i].classList.remove('selected');btn.classList.add('selected');}
+function fillTime(){
+  var n=new Date();document.getElementById('tYear').value=n.getFullYear();document.getElementById('tMonth').value=n.getMonth()+1;document.getElementById('tDay').value=n.getDate();document.getElementById('tHour').value=n.getHours();
+  var l=solarToLunarApprox(n.getFullYear(),n.getMonth()+1,n.getDate()),dzh=hourToDizhi(n.getHours()),dz=["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+  document.getElementById('timeInfo').textContent=n.getFullYear()+'年'+(n.getMonth()+1)+'月'+n.getDate()+'日 '+n.getHours()+'时 | 农历约：'+l.month+'月'+l.day+'日 '+dz[dzh]+'时';
+}
+
+function toast(msg){var el=document.getElementById('globalToast');if(!el){el=document.createElement('div');el.id='globalToast';el.style.cssText='position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:rgba(20,20,40,.92);color:var(--text);border:1px solid var(--dim2);padding:10px 14px;border-radius:10px;font-size:13px;z-index:9999;opacity:0;transition:opacity .25s';document.body.appendChild(el);}el.textContent=msg;el.style.opacity='1';clearTimeout(window._toastTimer);window._toastTimer=setTimeout(function(){el.style.opacity='0';},1800);}
+function showAIResult(text){var box=document.getElementById('aiResultBox');if(!box){var sec=document.createElement('div');sec.id='aiResultSection';sec.className='result-section fade-up';sec.innerHTML='<div class="result-section-title">✦ AI 解读 ✦</div><div id="aiResultBox" style="text-align:left;font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;max-height:60vh;overflow-y:auto;padding:8px;background:#0c0c1a;border-radius:8px"></div>';var area=document.getElementById('resultsArea');if(area)area.appendChild(sec);box=document.getElementById('aiResultBox');}if(text)box.textContent=text;return box;}
+function divine(){
+  var u,l,ml;
+  if(selectedTab===0){
+    var n1=parseInt(document.getElementById('numUpper').value),n2=parseInt(document.getElementById('numLower').value);
+    if(isNaN(n1)||isNaN(n2)||n1<1||n2<1){toast('请输入有效的上卦数和下卦数');return;}
+    u=numToGua(n1);l=numToGua(n2);var mv=document.getElementById('numMove').value.trim();
+    if(mv!==''){ml=parseInt(mv);if(isNaN(ml)||ml<1||ml>6)ml=calcMovingLine(n1,n2);}else{ml=calcMovingLine(n1,n2);}
+    showResult(u,l,[ml],'数字起卦','上卦数：'+n1+' 下卦数：'+n2+' 变父：第'+ml+'父');
+  }else if(selectedTab===1){
+    var y=parseInt(document.getElementById('tYear').value),m=parseInt(document.getElementById('tMonth').value),d=parseInt(document.getElementById('tDay').value),h=parseInt(document.getElementById('tHour').value);
+    if(isNaN(y)||isNaN(m)||isNaN(d)||isNaN(h)){toast('请填写完整时间');return;}
+    var ln=solarToLunarApprox(y,m,d),dzh=hourToDizhi(h)+1,n1=ln.month+ln.day,n2=ln.month+ln.day+dzh;
+    u=numToGua(n1);l=numToGua(n2);ml=calcMovingLine(n1,n2);
+    var dz=["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+    showResult(u,l,[ml],'时间起卦','农历约'+ln.month+'月'+ln.day+'日 '+dz[dzh-1]+'时 | 数：'+n1+'/'+n2);
+  }else if(selectedTab===2){
+    if(selectedDir===null){toast('请选择方位');return;}
+    var gi;if(selectedDir===-1){gi=8;}else{var dm=[2,4,8,3,5,6,1,7];gi=dm[selectedDir];}
+    u=GUA_NAMES[gi];var now=new Date(),ln=solarToLunarApprox(now.getFullYear(),now.getMonth()+1,now.getDate()),dzh=hourToDizhi(now.getHours())+1;
+    l=numToGua(ln.day+dzh);ml=calcMovingLine(gi,ln.day+dzh);
+    var dn=["西","东","西南","南","东南","北","西北","东北"];
+    var dl=selectedDir===-1?"中宫":dn[selectedDir];
+    showResult(u,l,[ml],'方位起卦','方位：'+dl+'('+u+') | 时数：'+(ln.day+dzh));
+  }
+}
+
+function showResult(upper,lower,ml,method,note){
+  var aL=getLines(upper,lower),fL=flipLines(aL,ml),bg=linesToUL(fL),hg=calcHugua(aL);
+  var lhm=false,uhm=false;for(var i=0;i<ml.length;i++){if(ml[i]<=3)lhm=true;else uhm=true;}
+  var ti,yn;if(!lhm){ti=lower;yn=upper;}else if(!uhm){ti=upper;yn=lower;}else{ti=lower;yn=upper;}
+  var tiWX=GUA_WUXING[ti],ynWX=GUA_WUXING[yn],rel=getWuxingRel(tiWX,ynWX),ri=MEIHUA_DATA["体用关系"][rel],sc=calcScore(rel);
+  var gn=GUA64[upper+lower]||"未知",gf=GUA64_F[gn]||"平";
+  var bgn=GUA64[bg.upper+bg.lower]||"",hgn=GUA64[hg.upper+hg.lower]||"";
+  var h='';
+  h+='<div class="result-section fade-up"><div class="result-section-title">本 卦</div>'+renderGD(upper,lower,ml);
+  h+='<div class="gua-title">'+gn+'</div>';
+  var fc=FORTUNE_COLOR[gf]||'var(--gold)';
+  h+='<div class="gua-fortune" style="color:'+fc+'">【'+gf+'】</div>';
+  h+='<div class="time-info" style="margin:4px 0">'+method+' — '+note+'</div></div>';
+  h+='<div class="result-section fade-up"><div class="result-section-title">互 卦</div>'+renderGD(hg.upper,hg.lower,[]);
+  h+='<div class="gua-title">'+(hgn||hg.upper+'上'+hg.lower+'下')+'</div></div>';
+  if(ml.length>0&&ml[0]>0){h+='<div class="result-section fade-up"><div class="result-section-title">变 卦</div>'+renderGD(bg.upper,bg.lower,[]);
+  h+='<div class="gua-title">'+(bgn||bg.upper+'上'+bg.lower+'下')+'</div></div>';}
+  h+='<div class="result-section fade-up"><div class="result-section-title">体用分析</div>';
+  h+='<div class="detail-row"><div class="detail-label">体卦</div><div class="detail-value">'+ti+'('+GUA_SYMBOLS[ti]+' '+GUA_NATURE[ti]+' · '+tiWX+')</div></div>';
+  h+='<div class="detail-row"><div class="detail-label">用卦</div><div class="detail-value">'+yn+'('+GUA_SYMBOLS[yn]+' '+GUA_NATURE[yn]+' · '+ynWX+')</div></div>';
+  h+='<div class="detail-row"><div class="detail-label">动父</div><div class="detail-value">第'+ml.join(',')+'父</div></div>';
+  var rc=rel.indexOf('克体')>=0?'xiong':(rel==='体克用'||rel==='用生体'?'ji':'ping');
+  h+='<div class="tiyong-rel '+rc+'">'+rel+'</div>';
+  h+='<div style="font-size:12px;color:var(--text);text-align:center;margin:4px 0;line-height:1.6">'+(ri?ri['断语']:'')+'</div>';
+  h+='<div style="background:var(--card2);border-radius:8px;padding:10px;margin-top:8px;font-size:11px;line-height:1.7;color:var(--text2)">';
+  h+='<div style="color:var(--gold);font-weight:700;margin-bottom:4px">趋吉避凶建议</div>';
+  h+='<div>吉利方位：'+getDir(tiWX)+'</div><div>五行补救：'+getRem(rel,tiWX,ynWX)+'</div><div>'+getAdv(rel)+'</div></div></div>';
+  h+='<div class="result-section fade-up"><div class="result-section-title">卦象类象</div><div class="liangxiang-grid">';
+  h+=renderLX(upper,'上卦')+renderLX(lower,'下卦')+'</div></div>';
+  h+='<div class="result-section fade-up"><div class="result-section-title">综合评分</div><div class="score-card">';
+  h+='<div class="score-num" style="color:'+getSC(sc)+'">'+sc+'</div><div class="score-label">满分100 · 基于体用生克</div>';
+  h+='<div class="score-bar"><div class="score-fill" style="width:'+sc+'%;background:'+getSC(sc)+'"></div></div></div></div>';
+  h+='<div class="btn-row"><button class="btn-ai" onclick="copyAI()">复制给AI</button><button class="btn-ai" onclick="doAIDirect()">AI 直接解读</button></div><div class="copy-hint" id="copyHint"></div>';
+  var area=document.getElementById('resultsArea');area.innerHTML=h;area.className='show';
+  saveToHistory({type:"meihua",time:Date.now(),question:method,summary:gn+' '+gf});
+  window._cmh={upper:upper,lower:lower,ml:ml,hg:hg,bg:bg,ti:ti,yn:yn,rel:rel,ri:ri,sc:sc,gn:gn,gf:gf,method:method,note:note};
+  setTimeout(function(){area.scrollIntoView({behavior:'smooth',block:'start'});},100);
+}
+
+function renderGD(upper,lower,ml){
+  var h='<div class="gua-display"><div class="trigram-box"><div class="trigram-lines">';
+  var uL=GUA_LINES[upper];for(var i=2;i>=0;i--){var n=i+4,d=false;for(var m=0;m<ml.length;m++){if(ml[m]===n)d=true;}h+=rL(uL[i],d);}
+  h+='</div><div class="trigram-name">'+upper+' '+GUA_SYMBOLS[upper]+'</div></div><div class="gua-arrow">→</div>';
+  h+='<div class="trigram-box"><div class="trigram-lines">';
+  var lL=GUA_LINES[lower];for(var i=2;i>=0;i--){var n=i+1,d=false;for(var m=0;m<ml.length;m++){if(ml[m]===n)d=true;}h+=rL(lL[i],d);}
+  h+='</div><div class="trigram-name">'+lower+' '+GUA_SYMBOLS[lower]+'</div></div></div>';
+  return h;
+}
+
+function rL(yang,dong){
+  if(yang)return '<div style="color:'+(dong?'var(--dong)':'var(--yang)')+'">'+(dong?'━━━━━━━○':'━━━━━━━')+'</div>';
+  return '<div style="color:'+(dong?'var(--dong)':'var(--yin)')+'">'+(dong?'━━ ━━×':'━━ ━━')+'</div>';
+}
+
+function renderLX(gua,label){
+  var d=MEIHUA_DATA["卦象类象"][gua];
+  if(!d)return '<div class="liangxiang-card"><div class="lx-title">'+gua+' · '+label+'</div><div class="lx-items">无数据</div></div>';
+  var cs=["天时","地理","人物","身体","动物","静物","出行","疾病"];
+  var h='<div class="liangxiang-card"><div class="lx-title">'+gua+' '+GUA_SYMBOLS[gua]+' · '+label+'</div>';
+  for(var i=0;i<cs.length;i++){var it=d[cs[i]];if(it&&it.length>0)h+='<div class="lx-cat">'+cs[i]+'：<span class="lx-items">'+it.join('、')+'</span></div>';}
+  return h+'</div>';
+}
+
+function getDir(wx){switch(wx){case '木':return '东方、东南方';case '火':return '南方';case '土':return '中央、东北方、西南方';case '金':return '西方、西北方';case '水':return '北方';default:return '中宫';}}
+
+function getRem(rel,tiWX,ynWX){
+  if(rel==='用克体'){var k='';for(var g in WX_KE)if(WX_KE[g]===tiWX)k=g;return '体卦'+tiWX+'受克，宜用'+WX_SHENG[tiWX]+'来化解，泄'+k+'之力';}
+  if(rel==='体生用')return '体卦'+tiWX+'泄气，宜用'+WX_SHENG[tiWX]+'来补'+tiWX+'之力';
+  if(rel==='用生体')return '体卦'+tiWX+'得助，顺势而为';
+  if(rel==='体克用')return '体卦'+tiWX+'有力，可进取但宜谨慎';
+  return '体用比和，'+tiWX+'势均，保持平衡';
+}
+
+function getAdv(rel){
+  switch(rel){case '用生体':return '注意：虽有贵人相助，仍需自身努力';case '体生用':return '注意：付出较多，量力而行，注意休息';case '用克体':return '注意：外部阻力大，宜守不宜攻，化解为上';case '体克用':return '注意：虽能克服困难，但费心费力，不可大意';case '体用比和':return '注意：平稳之中求发展，不可冒进';default:return '';}
+}
+
+function getSC(s){if(s>=80)return '#44ff44';if(s>=60)return '#88cc44';if(s>=40)return '#cccc44';if(s>=20)return '#cc8844';return '#ff4444';}
+
+function buildAI(){
+  var c=window._cmh;if(!c)return '';
+  var t='【梅花易数排盘结果】\r\n\r\n起卦方式：'+c.method+'\r\n'+c.note+'\r\n\r\n';
+  t+='本卦：'+c.upper+'上'+c.lower+'下 → '+c.gn+' 【'+c.gf+'】\r\n';
+  t+='互卦：'+c.hg.upper+'上'+c.hg.lower+'下 → '+(GUA64[c.hg.upper+c.hg.lower]||'')+'\r\n';
+  t+='变卦：'+c.bg.upper+'上'+c.bg.lower+'下 → '+(GUA64[c.bg.upper+c.bg.lower]||'')+'\r\n';
+  t+='动父：第'+c.ml.join(',')+'父\r\n\r\n';
+  t+='体卦：'+c.ti+'('+GUA_WUXING[c.ti]+')\r\n用卦：'+c.yn+'('+GUA_WUXING[c.yn]+')\r\n';
+  t+='体用关系：'+c.rel+'\r\n断语：'+(c.ri?c.ri['断语']:'')+'\r\n综合评分：'+c.sc+'/100\r\n';
+  var s='你是一位精通《梅花易数》的传统术数大师。请根据以下梅花易数排盘结果，进行专业的断卦分析。\r\n分析要点：体用生克关系、卦象类象取象、互卦变卦趋势、卦气旺衰。\r\n输出结构：卦象确认→体用分析→卦象类象→互变趋势→综合断语→趋吉避凶建议。';
+  return '【系统提示】\r\n'+s+'\r\n\r\n'+t;
+}
+function doAIDirect(){
+  var t=buildAI();if(!t){document.getElementById('copyHint').textContent='请先起卦';return;}
+  var s=window._cmh;if(!s){toast('请先起卦');return;}
+  var url=localStorage.getItem('zy_api_base')||'';var key=localStorage.getItem('zy_api_key')||'';var model=localStorage.getItem('zy_api_model')||'gpt-4o';
+  if(!url||!key){document.getElementById('copyHint').textContent='请先在设置中填写API地址和Key';toggleSidebar();return;}
+  var box=showAIResult('');box.innerHTML='<div style="text-align:center;padding:20px;color:var(--dim)"><span style="display:inline-block;width:18px;height:18px;border:2px solid var(--dim);border-top:2px solid var(--gold);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:8px"></span>AI 正在断卦，请稍候…</div>';
+  document.getElementById('copyHint').textContent='';
+  var aiAbortCtrl=new AbortController();
+  var sysPrompt='你是一位擅长梅花易数的老先生，说话简单直接，像跟晚辈唠嗑一样。请根据以下梅花易数排盘结果给出解读。分析思路：先说这个卦整体好不好，再看体卦用卦谁强谁弱、互卦变卦暗示什么走向，最后结合卦象类象给出具体建议。要求：说人话，别堆术语，多给实用建议。不好的方面委婉说，好的方面加油鼓励。';
+  var apiUrl=url.replace(/\/+$/,'');if(!apiUrl.endsWith('/chat/completions'))apiUrl+='/chat/completions';fetch(apiUrl,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:model,messages:[{role:'system',content:sysPrompt},{role:'user',content:t}],stream:true,max_tokens:2000}),signal:aiAbortCtrl.signal}).then(function(resp){
+    if(!resp.ok){resp.text().then(function(errText){box.innerHTML='<div style="color:var(--red);text-align:center;padding:12px">请求失败('+resp.status+'): '+errText.substring(0,200)+'</div>'});return}
+    var reader=resp.body.getReader();var decoder=new TextDecoder();var buffer='';var fullText='';
+    box.innerHTML='<span class="ai-cursor"></span>';
+    function readChunk(){reader.read().then(function(result){
+      if(result.done){box.innerHTML=fullText;document.getElementById('copyHint').textContent='AI解读完成！';return}
+      buffer+=decoder.decode(result.value,{stream:true});
+      var lines=buffer.split('\n');buffer=lines.pop()||'';
+      for(var i=0;i<lines.length;i++){var line=lines[i].trim();if(!line||line==='data: [DONE]')continue;if(line.indexOf('data: ')===0){try{var json=JSON.parse(line.substring(6));var delta=json.choices&&json.choices[0]&&json.choices[0].delta;if(delta&&delta.content){fullText+=delta.content;box.innerHTML=fullText+'<span class="ai-cursor"></span>';box.scrollTop=box.scrollHeight;}}catch(e){}}}
+      readChunk();
+    }).catch(function(e){if(e.name!=='AbortError'){box.innerHTML=fullText+'<div style="color:var(--red);font-size:12px;text-align:center;padding:8px">读取中断: '+e.message+'</div>'}});}
+    readChunk();
+  }).catch(function(e){if(e.name!=='AbortError'){box.innerHTML='<div style="color:var(--red);text-align:center;padding:12px">请求失败: '+e.message+'</div>'}});
+}
+function copyAI(){
+  var t=buildAI();if(!t){document.getElementById('copyHint').textContent='请先起卦';return;}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){document.getElementById('copyHint').textContent='已复制！粘贴给AI即可';}).catch(function(){fbCopy(t);});}else{fbCopy(t);}
+}
+function fbCopy(t){var a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;left:-9999px';document.body.appendChild(a);a.select();try{document.execCommand('copy');document.getElementById('copyHint').textContent='已复制！';}catch(e){document.getElementById('copyHint').textContent='复制失败';}document.body.removeChild(a);}
+
+function toggleSidebar(){document.getElementById('sidebarOverlay').classList.toggle('show');document.getElementById('sidebar').classList.toggle('show');}
+function saveConfig(){localStorage.setItem('zy_api_base',document.getElementById('cfgApi').value.trim());localStorage.setItem('zy_api_key',document.getElementById('cfgKey').value.trim());localStorage.setItem('zy_api_model',document.getElementById('cfgModel').value.trim());document.getElementById('connStatus').textContent='配置已保存';document.getElementById('connStatus').style.color='var(--green)';}
+function loadConfig(){document.getElementById('cfgApi').value=localStorage.getItem('zy_api_base')||'';document.getElementById('cfgKey').value=localStorage.getItem('zy_api_key')||'';document.getElementById('cfgModel').value=localStorage.getItem('zy_api_model')||'';document.getElementById('connStatus').textContent='';document.getElementById('connStatus').style.color='var(--dim)';}
+function testConnection(){var a=document.getElementById('cfgApi').value.trim(),k=document.getElementById('cfgKey').value.trim();if(!a||!k){document.getElementById('connStatus').textContent='请填写API地址和Key';document.getElementById('connStatus').style.color='var(--red)';return;}document.getElementById('connStatus').textContent='测试中...';document.getElementById('connStatus').style.color='var(--dim)';var apiUrl=a.replace(/\/+$/,'');if(!apiUrl.endsWith('/chat/completions'))apiUrl+='/chat/completions';fetch(apiUrl,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+k},body:JSON.stringify({model:document.getElementById('cfgModel').value||'gpt-4o',messages:[{role:'user',content:'hi'}],max_tokens:5})}).then(function(r){if(r.ok){document.getElementById('connStatus').textContent='连接成功 ✓';document.getElementById('connStatus').style.color='var(--green)';}else{document.getElementById('connStatus').textContent='连接失败 ('+r.status+')';document.getElementById('connStatus').style.color='var(--red)';}}).catch(function(){document.getElementById('connStatus').textContent='网络错误';document.getElementById('connStatus').style.color='var(--red)';});}
+
+function openHistory(){renderHistory();document.getElementById('historyOverlay').classList.add('show');document.getElementById('historyPanel').classList.add('show')}
+function closeHistory(){document.getElementById('historyOverlay').classList.remove('show');document.getElementById('historyPanel').classList.remove('show')}
+function clearHistory(){localStorage.removeItem('zy_history');renderHistory()}
+function renderHistory(){var h=getHistory();var box=document.getElementById('historyList');if(!h.length){box.innerHTML='<div style="text-align:center;color:var(--dim);padding:40px 0;">暂无记录</div>';return}var typeLabel={liuyao:'六爻',meihua:'梅花',qimen:'奇门'};var html='<div style="text-align:right;margin-bottom:10px;"><button onclick="clearHistory()" style="background:none;border:1px solid var(--dim2);color:var(--dim);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;">清除全部</button></div>';for(var i=0;i<h.length;i++){var r=h[i];var t=new Date(r.time);var timeStr=(t.getMonth()+1)+'/'+t.getDate()+' '+t.getHours()+':'+String(t.getMinutes()).padStart(2,'0');var badge=typeLabel[r.type]||r.type;var link=r.type+'.html';html+='<div style="background:var(--card2);border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:pointer;" onclick="location.href=\''+link+'\'">';html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';html+='<span style="color:var(--gold);font-size:12px;font-weight:700;">'+badge+'</span>';html+='<span style="color:var(--dim);font-size:11px;">'+timeStr+'</span></div>';html+='<div style="font-size:13px;color:var(--text);">'+(r.question||'未记录')+'</div>';html+='<div style="font-size:12px;color:var(--text2);margin-top:2px;">'+(r.summary||'')+'</div>';html+='</div>'}box.innerHTML=html}
+function getHistory(){try{return JSON.parse(localStorage.getItem('zy_history')||'[]')}catch(e){return []}}
+function saveToHistory(entry){var h=getHistory();h.unshift(entry);if(h.length>50)h=h.slice(0,50);localStorage.setItem('zy_history',JSON.stringify(h))}
+
+loadConfig();fillTime();toast("选择起卦方式后点击 起卦");
+
+
+</script>
+</body>
+</html>
+
+
+
